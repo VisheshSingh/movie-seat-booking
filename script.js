@@ -6,28 +6,47 @@ const totalPrice = document.getElementById('total');
 
 let price = +movieList.value;
 
-function selectedMovie(movieIndex, price) {
+populateUI();
+
+function setMovieData(movieIndex, price) {
   localStorage.setItem('selectedMovieIndex', movieIndex);
   localStorage.setItem('selectedMoviePrice', price);
 }
 
+function updateSelectedCount() {
+  const selectedSeats = container.querySelectorAll('.row .seat.selected');
+
+  const seatsIndex = [...selectedSeats].map(seat => [...seats].indexOf(seat));
+  localStorage.setItem('selectedSeats', JSON.stringify(seatsIndex));
+
+  const selectedSeatCount = selectedSeats.length;
+  console.log(price);
+  count.innerText = selectedSeatCount;
+  totalPrice.innerText = price * selectedSeatCount;
+}
+
+function populateUI() {
+  const selectedSeats = JSON.parse(localStorage.getItem('selectedSeats'));
+  if (selectedSeats.length > 0 && selectedSeats !== null) {
+    seats.forEach((seat, index) => {
+      if (selectedSeats.indexOf(index) > -1) {
+        seat.classList.add('selected');
+      }
+    });
+  }
+
+  const selectedMovieIndex = localStorage.getItem('selectedMovieIndex');
+
+  if (selectedMovieIndex !== null) {
+    movieList.selectedIndex = selectedMovieIndex;
+  }
+}
+
 movieList.addEventListener('change', e => {
   price = +e.target.value;
-  selectedMovie(e.target.selectedIndex, e.target.value);
-  updateSelectedPrice();
+  setMovieData(e.target.selectedIndex, e.target.value);
+  updateSelectedCount();
 });
-
-function updateSelectedPrice() {
-  const selectedSeats = container.querySelectorAll('.seat.selected');
-  const totalSeats = selectedSeats.length;
-
-  const selectedIndex = [...selectedSeats].map(seat =>
-    [...seats].indexOf(seat)
-  );
-  localStorage.setItem('selectedIndex', JSON.stringify(selectedIndex));
-  count.innerText = totalSeats;
-  totalPrice.innerText = price * totalSeats;
-}
 
 container.addEventListener('click', e => {
   if (
@@ -36,6 +55,8 @@ container.addEventListener('click', e => {
   ) {
     e.target.classList.toggle('selected');
 
-    updateSelectedPrice();
+    updateSelectedCount();
   }
 });
+
+updateSelectedCount();
